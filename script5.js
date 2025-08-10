@@ -2,7 +2,8 @@ let currentSong = new Audio();
 let songs = [];
 let currfolder = "";
 
-const GITHUB_BASE_URL = "https://menacefg78.github.io/songs/";
+// UPDATED base URL to include repo folder "Projects"
+const GITHUB_BASE_URL = "https://menacefg78.github.io/Projects/songs/";
 
 // Convert seconds to MM:SS format
 function secondsToMinutesSeconds(seconds) {
@@ -80,8 +81,8 @@ async function displayAlbums() {
     console.log("displaying albums");
     let cardContainer = document.querySelector(".cardContainer");
 
-    // Replace this with your actual album folder names
-    let albumFolders = ["ncs", "album2", "album3"];
+    // UPDATED album folder names to match actual folders in your repo
+    let albumFolders = ["cs"]; // Assuming you only have 'cs' folder
 
     for (const folder of albumFolders) {
         try {
@@ -112,8 +113,8 @@ async function displayAlbums() {
 }
 
 async function main() {
-    // Load default playlist (first folder from albumFolders)
-    await loadPlaylist("ncs");
+    // Load default playlist from 'cs' folder (your actual folder)
+    await loadPlaylist("cs");
 
     // Display all albums
     await displayAlbums();

@@ -6,7 +6,8 @@ let currfolder = "";
 const GITHUB_BASE_URL = "https://menacefg78.github.io/Projects/songs/";
 
 // Play button in the playbar (the play/pause img)
-const playBtn = document.querySelector(".playNow img.invert");
+const playBtn = document.getElementById("play");
+
 
 // Convert seconds to MM:SS format
 function secondsToMinutesSeconds(seconds) {
@@ -38,10 +39,11 @@ function showSongs(songListArray) {
   songUL.innerHTML = "";
 
   songListArray.forEach((song) => {
+    const displayName = decodeURIComponent(song).replaceAll("%20", " ");
     songUL.innerHTML += `
       <li>
         <img src="music.svg" alt="music icon">
-        <div class="info"><div>${song.replaceAll("%20", " ")}</div></div>
+        <div class="info"><div>${displayName}</div></div>
         <div class="playNow">
           <span>Play Now</span>
           <img class="invert" src="play.svg" alt="play">
@@ -62,7 +64,11 @@ function showSongs(songListArray) {
 function playMusic(track, pause = false) {
   // Ensure .mp3 extension
   let trackFile = track.toLowerCase().endsWith(".mp3") ? track : `${track}.mp3`;
-  const url = `${GITHUB_BASE_URL}${currfolder}/${trackFile}`;
+
+  // Encode spaces and special chars properly for URL
+  const encodedTrackFile = encodeURIComponent(trackFile).replace(/%20/g, "%20");
+
+  const url = `${GITHUB_BASE_URL}${currfolder}/${encodedTrackFile}`;
   console.log("Playing song URL:", url);
 
   currentSong.pause();
@@ -76,13 +82,16 @@ function playMusic(track, pause = false) {
     if (playBtn) playBtn.src = "play.svg";
   }
 
-  document.querySelector(".songinfo").textContent = decodeURIComponent(trackFile);
+  document.querySelector(".songinfo").textContent = trackFile;
   document.querySelector(".songtime").textContent = "00:00 / 00:00";
 }
 
 // Load playlist and show songs from folder
 async function loadPlaylist(folderName) {
   songs = await getSongs(folderName);
+  if (songs.length === 0) {
+    console.warn(`No songs found in folder ${folderName}`);
+  }
   showSongs(songs);
   if (songs.length > 0) {
     playMusic(songs[0], true);
@@ -92,7 +101,9 @@ async function loadPlaylist(folderName) {
 // Display album cards from a list of album folders
 async function displayAlbums() {
   const cardContainer = document.querySelector(".cardContainer");
-  const albumFolders = ["cs"]; // Add more folder names if you have
+  const albumFolders = ["cs", "ncs", "play1"]; // Add all your folders here
+
+  cardContainer.innerHTML = ""; // Clear before adding cards
 
   for (const folder of albumFolders) {
     try {
@@ -104,12 +115,12 @@ async function displayAlbums() {
       const info = await res.json();
       cardContainer.innerHTML += `
         <div data-folder="${folder}" class="card">
-          <div class="play">
+          <div class="play" aria-label="Play album ${info.title}" role="button" tabindex="0">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M5 20V4L19 12L5 20Z" stroke="#141B34" fill="#000" stroke-width="1.5" stroke-linejoin="round" />
             </svg>
           </div>
-          <img src="${GITHUB_BASE_URL}${folder}/cover.jpg" alt="Album Cover">
+          <img src="${GITHUB_BASE_URL}${folder}/cover.jpg" alt="Album Cover of ${info.title}">
           <h2>${info.title}</h2>
           <p>${info.description}</p>
         </div>`;
